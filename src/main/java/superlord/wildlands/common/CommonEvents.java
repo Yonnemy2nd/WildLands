@@ -31,7 +31,7 @@ public class CommonEvents {
 	}
 		
     private static void compostibleBlockss() {
-		compostibleBlocks(0.3F, WLBlocks.COCONUT_LEAVES.get());
+    	compostibleBlocks(0.3F, WLBlocks.COCONUT_LEAVES.get());
 		compostibleBlocks(0.3F, WLBlocks.CYPRESS_LEAVES.get());
 		compostibleBlocks(0.3F, WLBlocks.COCONUT_SAPLING.get());
 		compostibleBlocks(0.3F, WLBlocks.CYPRESS_SAPLING.get());

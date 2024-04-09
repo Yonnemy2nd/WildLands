@@ -70,6 +70,7 @@ public class OlivinePressurePlateBlock extends BasePressurePlateBlock {
 						int i = player.experienceLevel;
 						if (i > 15) i = 15;
 						this.i = i;
+						if (i >= 15) i = 15;
 						return i;
 					}
 				}
