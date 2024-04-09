@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,7 +46,7 @@ public class Coconut extends ThrowableItemProjectile {
 
 	@Nonnull
 	@Override
-	public Packet<?> getAddEntityPacket() {
+	public Packet<ClientGamePacketListener> getAddEntityPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
 	}
 
@@ -54,7 +54,7 @@ public class Coconut extends ThrowableItemProjectile {
 		super.onHitEntity(result);
 		Entity entity = result.getEntity();
 		if (!(entity instanceof Boat)) {
-			entity.hurt(DamageSource.thrown(this, this.getOwner()), 2);
+			entity.hurt(this.damageSources().thrown(this, this.getOwner()), 2);
 		}
 	}
 
@@ -67,7 +67,7 @@ public class Coconut extends ThrowableItemProjectile {
 	protected void onHit(HitResult result) {
 		super.onHit(result);
 		if (!this.level.isClientSide) {
-			BlockPos pos = new BlockPos(result.getLocation());
+			BlockPos pos = new BlockPos((int) this.getX(), (int) this.getY(), (int) this.getZ());
 			if (level.getBlockState(pos).is(Blocks.STONE) || level.getBlockState(pos.below()).is(Blocks.STONE)) {
 				this.spawnItem(WLItems.CRACKED_COCONUT.get().getDefaultInstance());
 			} else if (result.getType() == HitResult.Type.ENTITY) {

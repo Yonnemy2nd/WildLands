@@ -29,7 +29,7 @@ public class CommonEvents {
 			registerFlammables();
 		});
 	}
-	
+		
     private static void compostibleBlockss() {
     	compostibleBlocks(0.3F, WLBlocks.COCONUT_LEAVES.get());
 		compostibleBlocks(0.3F, WLBlocks.CYPRESS_LEAVES.get());
@@ -49,7 +49,7 @@ public class CommonEvents {
     }
     
     public static void registerFlammables() {
-    	registerFlammable(WLBlocks.CYPRESS_PLANKS.get(), 5, 20);
+		registerFlammable(WLBlocks.CYPRESS_PLANKS.get(), 5, 20);
 		registerFlammable(WLBlocks.COCONUT_PLANKS.get(), 5, 20);
 		registerFlammable(WLBlocks.CHARRED_PLANKS.get(), 3, 10);
 		registerFlammable(WLBlocks.CYPRESS_SLAB.get(), 5, 20);

@@ -3,11 +3,11 @@ package superlord.wildlands.client.render;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
-import com.google.common.collect.ImmutableMap;
-
-import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.model.ChestBoatModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -18,7 +18,7 @@ import superlord.wildlands.common.entity.WLBoat.WLBoatTypes;
 import superlord.wildlands.common.entity.WLChestBoat;
 
 public class WLChestBoatRenderer extends BoatRenderer {
-	private final Map<WLBoatTypes, Pair<ResourceLocation, BoatModel>> modChestBoatResources;
+	private final Map<WLBoatTypes, Pair<ResourceLocation, ListModel<Boat>>> modChestBoatResources;
 
     public WLChestBoatRenderer(EntityRendererProvider.Context renderContext, boolean isChestBoot) {
         super(renderContext, isChestBoot);
@@ -28,12 +28,12 @@ public class WLChestBoatRenderer extends BoatRenderer {
         }, (boatType) -> {
             return Pair.of(
                     new ResourceLocation(WildLands.MOD_ID, "textures/entity/chest_boat/" + boatType.getName() + ".png"),
-                    new BoatModel(renderContext.bakeLayer(
+                    new ChestBoatModel(renderContext.bakeLayer(
                             new ModelLayerLocation(
                                     new ResourceLocation("chest_boat/oak"),
                                     "main"
                             )
-                    ), isChestBoot)
+                    ))
             );
         }));
     }
@@ -43,7 +43,7 @@ public class WLChestBoatRenderer extends BoatRenderer {
     }
 
     @Override
-    public Pair<ResourceLocation, BoatModel> getModelWithLocation(Boat boat) {
+    public Pair<ResourceLocation, ListModel<Boat>> getModelWithLocation(Boat boat) {
         WLChestBoat moddedBoat = (WLChestBoat) boat;
         return modChestBoatResources.get(moddedBoat.getWLChestBoatType());
     }

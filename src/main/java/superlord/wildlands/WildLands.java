@@ -1,21 +1,27 @@
 package superlord.wildlands;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.mojang.serialization.Codec;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.world.BiomeModifier;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -40,6 +46,7 @@ import superlord.wildlands.common.entity.Jellyfish;
 import superlord.wildlands.common.entity.Octopus;
 import superlord.wildlands.common.entity.SeaLion;
 import superlord.wildlands.common.world.WLBiomeModifier;
+import superlord.wildlands.common.world.WLFeatureAndBiomeGenerator;
 import superlord.wildlands.common.world.biome.BayouRegionProvider;
 import superlord.wildlands.common.world.biome.BiomeRegistry;
 import superlord.wildlands.common.world.biome.BurntForestRegionProvider;
@@ -47,7 +54,6 @@ import superlord.wildlands.config.WLConfigHolder;
 import superlord.wildlands.config.WildLandsConfig;
 import superlord.wildlands.init.WLBlockEntities;
 import superlord.wildlands.init.WLBlocks;
-import superlord.wildlands.init.WLConfiguredFeatures;
 import superlord.wildlands.init.WLEffects;
 import superlord.wildlands.init.WLEntities;
 import superlord.wildlands.init.WLFeatures;
@@ -56,6 +62,7 @@ import superlord.wildlands.init.WLParticles;
 import superlord.wildlands.init.WLPlacedFeatures;
 import superlord.wildlands.init.WLSounds;
 import superlord.wildlands.init.WLSurfaceRules;
+import superlord.wildlands.init.WLTabs;
 import superlord.wildlands.init.WLWoodTypes;
 import terrablender.api.Regions;
 import terrablender.api.SurfaceRuleManager;
@@ -73,7 +80,6 @@ public class WildLands {
 		final ModLoadingContext modLoadingContext = ModLoadingContext.get();
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
-
 		bus.addListener(this::commonSetup);
 		bus.addListener(this::registerEntityAttributes);
 		bus.addListener(this::setup);
@@ -84,9 +90,10 @@ public class WildLands {
 		WLBlocks.REGISTER.register(bus);
 		WLEntities.REGISTER.register(bus);
 		WLItems.REGISTER.register(bus);
-		WLFeatures.FEATURES.register(bus);
-		WLConfiguredFeatures.CONFIGURED_FEATURES.register(bus);
-		WLPlacedFeatures.PLACED_FEATURES.register(bus);
+		WLItems.BLOCKS.register(bus);
+		WLItems.SPAWN_EGGS.register(bus);
+		WLTabs.REGISTER.register(bus);
+		WLFeatures.REGISTER.register(bus);
 		WLBlockEntities.REGISTER.register(bus);
 		WLEffects.EFFECTS.register(bus);
 		WLParticles.REGISTRY.register(bus);
@@ -97,6 +104,8 @@ public class WildLands {
 		biomeModifiers.register("wildlands_biome_modifiers", WLBiomeModifier::makeCodec);
 		modLoadingContext.registerConfig(ModConfig.Type.CLIENT, WLConfigHolder.CLIENT_SPEC, "wildlands.toml");
 		modLoadingContext.registerConfig(ModConfig.Type.COMMON, WLConfigHolder.SERVER_SPEC, "wildlands.toml");
+		
+		bus.addListener(this::gatherData);
 		
 		PROXY.init();
 	}
@@ -109,32 +118,25 @@ public class WildLands {
 			Regions.register(new BurntForestRegionProvider(new ResourceLocation(MOD_ID, "burnt_forest"), WildLandsConfig.burntForestWeight));
 		}
 		event.enqueueWork(() -> {
+			WLPlacedFeatures.init();
+			((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(WLBlocks.COCONUT_SAPLING.getId(), WLBlocks.POTTED_COCONUT_SAPLING);
+			((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(WLBlocks.CYPRESS_SAPLING.getId(), WLBlocks.POTTED_CYPRESS_SAPLING);
+			((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(WLBlocks.CATTAIL.getId(), WLBlocks.POTTED_CATTAIL);
+			((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(WLBlocks.PALMETTO.getId(), WLBlocks.POTTED_PALMETTO);
+			((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(WLBlocks.CHARRED_BUSH.getId(), WLBlocks.POTTED_CHARRED_BUSH);
 			WoodType.register(WLWoodTypes.CHARRED);
 			WoodType.register(WLWoodTypes.COCONUT);
 			WoodType.register(WLWoodTypes.CYPRESS);
 		});
 	}
-
-	public final static CreativeModeTab BLOCK_GROUP = new CreativeModeTab("wildlands_block_item_group") {
-		@Override
-		public ItemStack makeIcon() {
-			return new ItemStack(WLBlocks.MUD.get().asItem());
-		}
-	};
-
-	public final static CreativeModeTab ITEM_GROUP = new CreativeModeTab("wildlands_item_item_group") {
-		@Override
-		public ItemStack makeIcon() {
-			return new ItemStack(WLItems.OLIVINE.get());
-		}
-	};
-
-	public final static CreativeModeTab SPAWN_EGG_GROUP = new CreativeModeTab("wildlands_spawn_item_group") {
-		@Override
-		public ItemStack makeIcon() {
-			return new ItemStack(WLItems.CATFISH_SPAWN_EGG.get());
-		}
-	};
+	
+	public void gatherData(GatherDataEvent event) {
+        DataGenerator dataGenerator = event.getGenerator();
+        PackOutput packOutput = dataGenerator.getPackOutput();
+        CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
+        boolean server = event.includeServer();
+        dataGenerator.addProvider(server, new WLFeatureAndBiomeGenerator(packOutput, lookupProvider));
+    }
 
 	@SuppressWarnings("deprecation")
 	private void commonSetup(FMLCommonSetupEvent event) {

@@ -1,16 +1,14 @@
 package superlord.wildlands.client;
 
-import net.minecraft.client.color.item.ItemColor;
-import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
+import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -40,7 +38,6 @@ import superlord.wildlands.client.render.WLBoatRenderer;
 import superlord.wildlands.client.render.WLChestBoatRenderer;
 import superlord.wildlands.client.render.item.CoconutRenderer;
 import superlord.wildlands.client.render.item.JellyBallRenderer;
-import superlord.wildlands.common.item.WLSpawnEggItem;
 import superlord.wildlands.init.WLBlockEntities;
 import superlord.wildlands.init.WLEntities;
 import superlord.wildlands.init.WLWoodTypes;
@@ -81,19 +78,20 @@ public class ClientEvents {
 		event.registerEntityRenderer(WLEntities.SEA_LION.get(), SeaLionRenderer::new);
 		//RenderingRegistry.registerEntityRenderingHandler(WLEntities.CLAM.get(), manager -> new ClamRenderer());
 	}
-	
+
 	@SubscribeEvent
-    public static void init(final FMLClientSetupEvent event) {
+	public static void init(final FMLClientSetupEvent event) {
 		BlockEntityRenderers.register(WLBlockEntities.SIGN.get(), SignRenderer::new);
-        event.enqueueWork(() -> {
-        	Sheets.addWoodType(WLWoodTypes.CYPRESS);
-        	Sheets.addWoodType(WLWoodTypes.COCONUT);
-        	Sheets.addWoodType(WLWoodTypes.CHARRED);
-        });
-        ClientProxy.setupBlockRenders();
+		BlockEntityRenderers.register(WLBlockEntities.HANGING_SIGN.get(), HangingSignRenderer::new);
+		event.enqueueWork(() -> {
+			Sheets.addWoodType(WLWoodTypes.CYPRESS);
+			Sheets.addWoodType(WLWoodTypes.COCONUT);
+			Sheets.addWoodType(WLWoodTypes.CHARRED);
+		});
+		ClientProxy.setupBlockRenders();
 	}
 
-	
+
 	@SubscribeEvent
 	public static void registerLayerDefinition(EntityRenderersEvent.RegisterLayerDefinitions event) {
 		event.registerLayerDefinition(ALLIGATOR, AlligatorModel::createBodyLayer);
@@ -108,15 +106,6 @@ public class ClientEvents {
 		event.registerLayerDefinition(JELLYFISH, JellyfishModel::createBodyLayer);
 		event.registerLayerDefinition(OCTOPUS, OctopusModel::createBodyLayer);
 		event.registerLayerDefinition(SEA_LION, SeaLionModel::createBodyLayer);
-	}
-	
-	@SuppressWarnings("deprecation")
-	@SubscribeEvent
-	@OnlyIn(Dist.CLIENT)
-	public static void itemColors(RegisterColorHandlersEvent.Item event) {
-		ItemColors handler = event.getItemColors();
-		ItemColor eggColor = (stack, tintIndex) -> ((WLSpawnEggItem) stack.getItem()).getColor(tintIndex);
-		for (WLSpawnEggItem e : WLSpawnEggItem.UNADDED_EGGS) handler.register(eggColor, e);
 	}
 
 }

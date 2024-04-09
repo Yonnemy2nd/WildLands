@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.model.BoatModel;
+import net.minecraft.client.model.ListModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.BoatRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -20,7 +21,7 @@ import superlord.wildlands.common.entity.WLBoat.WLBoatTypes;
 
 @OnlyIn(Dist.CLIENT)
 public class WLBoatRenderer extends BoatRenderer {
-	private final Map<WLBoatTypes, Pair<ResourceLocation, BoatModel>> modBoatResources;
+	private final Map<WLBoatTypes, Pair<ResourceLocation, ListModel<Boat>>> modBoatResources;
 
     public WLBoatRenderer(EntityRendererProvider.Context renderContext, boolean isChestBoot) {
         super(renderContext, isChestBoot);
@@ -34,7 +35,7 @@ public class WLBoatRenderer extends BoatRenderer {
                         new ResourceLocation("boat/oak"),
                         "main"
                     )
-                ), isChestBoot)
+                ))
             );
         }));
     }
@@ -44,7 +45,7 @@ public class WLBoatRenderer extends BoatRenderer {
     }
     
     @Override
-    public Pair<ResourceLocation, BoatModel> getModelWithLocation(Boat boat) {
+    public Pair<ResourceLocation, ListModel<Boat>> getModelWithLocation(Boat boat) {
         WLBoat moddedBoat = (WLBoat) boat;
         return modBoatResources.get(moddedBoat.getWLBoatType());
     }

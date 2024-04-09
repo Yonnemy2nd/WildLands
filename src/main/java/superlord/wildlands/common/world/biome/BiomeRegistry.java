@@ -12,16 +12,15 @@ import superlord.wildlands.WildLands;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BiomeRegistry {
-	
-    public static final DeferredRegister<Biome> REGISTER = DeferredRegister.create(ForgeRegistries.BIOMES, WildLands.MOD_ID);
+
+	public static final DeferredRegister<Biome> REGISTER = DeferredRegister.create(ForgeRegistries.BIOMES, WildLands.MOD_ID);
 
 	public static void registerBiomes() {
-		register(BiomeInitializer.BAYOU, BayouBiomeDecorator::decorateBayou);
-		register(BiomeInitializer.BURNT_FOREST, BurntForestBiomeDecorator::decorateBurntForest);
+		//register(BiomeInitializer.BAYOU, BayouBiomeDecorator::decorateBayou);
+		//register(BiomeInitializer.BURNT_FOREST, BurntForestBiomeDecorator::decorateBurntForest);
 	}
 
 	public static RegistryObject<Biome> register(ResourceKey<Biome> key, Supplier<Biome> biomeSupplier) {
 		return REGISTER.register(key.location().getPath(), biomeSupplier);
 	}
-	
 }

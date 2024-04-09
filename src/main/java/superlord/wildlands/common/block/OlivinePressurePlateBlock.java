@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.BasePressurePlateBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.AABB;
@@ -24,8 +25,8 @@ public class OlivinePressurePlateBlock extends BasePressurePlateBlock {
 
 	int i;
 
-	public OlivinePressurePlateBlock(Sensitivity sensitivityIn, Properties propertiesIn) {
-		super(propertiesIn);
+	public OlivinePressurePlateBlock(Sensitivity sensitivityIn, Properties propertiesIn, BlockSetType type) {
+		super(propertiesIn, type);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, Boolean.valueOf(false)));
 		this.sensitivity = sensitivityIn;
 	}
@@ -46,6 +47,7 @@ public class OlivinePressurePlateBlock extends BasePressurePlateBlock {
 		worldIn.playSound((Player)null, pos, SoundEvents.STONE_PRESSURE_PLATE_CLICK_OFF, SoundSource.BLOCKS, 0.3F, 0.5F);
 	}
 
+	@Override
 	protected int getSignalStrength(Level worldIn, BlockPos pos) {
 		AABB axisalignedbb = TOUCH_AABB.move(pos);
 		List<? extends Entity> list;
@@ -66,6 +68,7 @@ public class OlivinePressurePlateBlock extends BasePressurePlateBlock {
 					if (entity instanceof Player) {
 						Player player = (Player) entity;
 						int i = player.experienceLevel;
+						if (i > 15) i = 15;
 						this.i = i;
 						if (i >= 15) i = 15;
 						return i;
@@ -73,7 +76,6 @@ public class OlivinePressurePlateBlock extends BasePressurePlateBlock {
 				}
 			}
 		}
-
 		return 0;
 	}
 

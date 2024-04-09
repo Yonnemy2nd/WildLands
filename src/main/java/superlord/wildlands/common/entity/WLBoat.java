@@ -2,6 +2,7 @@ package superlord.wildlands.common.entity;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkHooks;
-import net.minecraftforge.network.PlayMessages;
+import net.minecraftforge.network.PlayMessages.SpawnEntity;
 import superlord.wildlands.init.WLBlocks;
 import superlord.wildlands.init.WLEntities;
 import superlord.wildlands.init.WLItems;
@@ -35,7 +36,7 @@ public class WLBoat extends Boat {
 		this.zo = positionZ;
 	}
 
-	public WLBoat(PlayMessages.SpawnEntity spawnEntity, Level level) {
+	public WLBoat(SpawnEntity spawnEntity, Level level) {
 		this(WLEntities.BOAT.get(), level);
 	}
 
@@ -57,7 +58,7 @@ public class WLBoat extends Boat {
 	}
 
 	@Override
-	public Packet<?> getAddEntityPacket() {
+	public Packet<ClientGamePacketListener> getAddEntityPacket() {
 		return NetworkHooks.getEntitySpawningPacket(this);
 	}
 
@@ -70,12 +71,11 @@ public class WLBoat extends Boat {
 	}
 
 	@Override
-	public Boat.Type getBoatType() {
+	public Boat.Type getVariant() {
 		return Boat.Type.OAK;
 	}
 
-	@Override
-	public void setType(Boat.Type boatType) {
+	public void setVariant(WLBoatTypes type) {
 	}
 
 	@Override
